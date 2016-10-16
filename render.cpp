@@ -1,12 +1,19 @@
 #include <Bela.h>
 #include <OSCServer.h>
 #include <OSCClient.h>
+#include <AudioNode.h>
+#include <AudioNodes.h>
 
 #define OSC_RECIEVE 3427
 #define OSC_SEND 3426
 
 OSCServer oscServer;
 OSCClient oscClient;
+
+AudioSourceNode* source;
+AudioDestinationNode* destination;
+
+std::vector<AudioNode*> nodes;
 
 // parse messages received by OSC Server
 void parseMessage(oscpkt::Message msg){
@@ -26,9 +33,16 @@ bool setup(BelaContext *context, void *userData)
     oscServer.setup(OSC_RECIEVE);
     oscClient.setup(OSC_SEND);
     
+    nodes.reserve(4096);
+    
+    source = new AudioSourceNode();
+    destination = new AudioDestinationNode();
+    
+    source->connectTo(0, destination, 0);
+    
     // the following code sends an OSC message to address /osc-setup
     // then waits 1 second for a reply on /osc-setup-reply
-    bool handshakeReceived = false;
+    /*bool handshakeReceived = false;
     oscClient.sendMessageNow(oscClient.newMessage.to("/osc-setup").end());
     oscServer.receiveMessageNow(1000);
     while (oscServer.messageWaiting()){
@@ -41,18 +55,27 @@ bool setup(BelaContext *context, void *userData)
         rt_printf("handshake received!\n");
     } else {
         rt_printf("timeout!\n");
-    }
+    }*/
     
 	return true;
 }
 
+bool done = false;
 void render(BelaContext *context, void *userData)
 {
     // receive OSC messages, parse them, and send back an acknowledgment
-    while (oscServer.messageWaiting()){
+    /*while (oscServer.messageWaiting()){
         parseMessage(oscServer.popMessage());
-        oscClient.queueMessage(oscClient.newMessage.to("/osc-acknowledge").add(5).add(4.2f).add(std::string("OSC message received")).end());
+    }*/
+    
+    if (!done){
+    	//done = true;
+    	source->recieveInterleavedInput(context);
+	    destination->setInterleavedOutput(context);
+	    destination->resetInputs();
     }
+    
+    
 }
 
 void cleanup(BelaContext *context, void *userData)

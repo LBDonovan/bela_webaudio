@@ -8,6 +8,12 @@ var osc = require('osc-min');
 var OSC_RECEIVE = 3426;
 var OSC_SEND = 3427;
 
+var belaSetup = false;
+var preSetupBuffer = {
+	oscType 	: 'bundle',
+	elements	: []
+};
+
 // socket to send and receive OSC messages from bela
 var socket;
 
@@ -23,14 +29,21 @@ function parseMessage(msg){
 	if (address[1] === 'osc-setup'){
 		console.log('setup recieved');
 		sendOSC({ address : '/osc-setup-reply' });
+		belaSetup = true;
+		if (preSetupBuffer.elements.length)
+			sendOSC(preSetupBuffer);
 	}
 }
 
 function sendOSC(msg){
-	var buffer = osc.toBuffer(msg);
-	socket.send(buffer, 0, buffer.length, OSC_SEND, '127.0.0.1', function(err) {
-		if (err) console.log(err);
-	});
+	if (belaSetup){
+		var buffer = osc.toBuffer(msg);
+		socket.send(buffer, 0, buffer.length, OSC_SEND, '127.0.0.1', function(err) {
+			if (err) console.log(err);
+		});
+	} else {
+		preSetupBuffer.elements.push(msg);
+	}
 }
 
 class AudioContext extends EventEmitter {
@@ -38,7 +51,7 @@ class AudioContext extends EventEmitter {
 	constructor(){
 		
 		super();
-
+		
 		// spawn the Bela process
 		var proc = spawn('stdbuf', ['-i0', '-e0', '-o0', 'make', '-C', '/root/Bela/', 'run', 'PROJECT=web_audio']);
 		proc.stdout.setEncoding('utf-8');
