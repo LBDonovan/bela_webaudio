@@ -10,8 +10,9 @@
 OSCServer oscServer;
 OSCClient oscClient;
 
-AudioSourceNode* source;
-AudioDestinationNode* destination;
+AudioSourceNode source(0);
+AudioDestinationNode destination(1);
+GainNode gain(2, 10.0);
 
 std::vector<AudioNode*> nodes;
 
@@ -35,10 +36,14 @@ bool setup(BelaContext *context, void *userData)
     
     nodes.reserve(4096);
     
-    source = new AudioSourceNode();
-    destination = new AudioDestinationNode();
+    nodes.push_back(&destination);
+    nodes.push_back(&gain);
     
-    source->connectTo(0, destination, 0);
+    rt_printf("%i\n", nodes.size());
+    
+    source.connectTo(0, &gain, 0);
+    gain.connectTo(0, &destination, 0);
+    // source.connectTo(0, &destination, 0);
     
     // the following code sends an OSC message to address /osc-setup
     // then waits 1 second for a reply on /osc-setup-reply
@@ -70,12 +75,15 @@ void render(BelaContext *context, void *userData)
     
     if (!done){
     	//done = true;
-    	source->recieveInterleavedInput(context);
-	    destination->setInterleavedOutput(context);
-	    destination->resetInputs();
+    	source.receiveInterleavedInput(context);
+	    destination.setInterleavedOutput(context);
+	    // gain.resetInputs();
+	    // destination.resetInputs();
     }
     
-    
+    for (auto node : nodes){
+    	node->resetInputs();
+    }
 }
 
 void cleanup(BelaContext *context, void *userData)

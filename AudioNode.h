@@ -4,8 +4,14 @@
 #define AUDIONODE_H_INC
 
 #include <vector>
+#include <stddef.h>
+
+#define MAX_CCM 0
+#define CLAMPED_MAX_CCM 1
+#define EXPLICIT_CCM 2
 
 struct AudioNodeContext{
+	AudioNodeContext() : inputBuffer(NULL), outputBuffer(NULL){}
 	int numInputs;
 	int numOutputs;
 	int numChannels;
@@ -19,11 +25,11 @@ struct OutputConnection;
 
 class AudioNode{
 	public:
-		AudioNode(int inputs, int outputs, int channelCount, int channelCountMode);
+		AudioNode(int id, int inputs, int outputs, int channelCount, int channelCountMode);
 		
 		void connectTo(int output, AudioNode* node, int input);
 		
-		void receiveInput(int input, AudioNodeContext* context);
+		void receiveInput(int input, AudioNode* node);
 		
 		void resetInputs();
 		
@@ -33,24 +39,32 @@ class AudioNode{
 		
 		virtual void render(AudioNodeContext* context){};
 		
-		void addInputConnection();
+		void addInputConnection(int numChannels);
 		
 		int inputConnections;
 		int inputConnectionsReceived;
 		
 		std::vector<OutputConnection> outputConnections;
 		
-	private:
+		int ID;
 		
-		/*int channelCount;
-		int channelCountMode;*/
+		int channelCount;
+		int channelCountMode;
 		
+		int getInputChannels();
+		int getOutputChannels();
+		void changeNumChannels(int numChannels);
+
 		int inputWidth;
 		int inputBufferLength;
 		//int outputBufferLength;
 		
+		int inputChannels;
+		int outputChannels;
+		
 		void createBuffers();
 		void process();
+		
 };
 
 struct OutputConnection{

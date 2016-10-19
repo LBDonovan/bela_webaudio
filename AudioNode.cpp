@@ -1,12 +1,16 @@
 /***** AudioNode.cpp *****/
 #include <AudioNode.h>
+#include <AudioNodes.h>
 #include <Bela.h>
 
-AudioNode::AudioNode(int inputs, int outputs, int channelCount, int channelCountMode):
+AudioNode::AudioNode(int id, int inputs, int outputs, int channelCount, int channelCountMode):
 	inputConnections(0),
-	inputConnectionsReceived(0)
-	/*channelCount(channelCount),
-	channelCountMode(channelCountMode)*/
+	inputConnectionsReceived(0),
+	ID(id),
+	channelCount(channelCount),
+	channelCountMode(channelCountMode),
+	inputChannels(channelCount),
+	outputChannels(channelCount)
 {
 	context.numInputs = inputs;
 	context.numOutputs = outputs;
@@ -17,9 +21,27 @@ AudioNode::AudioNode(int inputs, int outputs, int channelCount, int channelCount
 	createBuffers();
 };
 
+int AudioNode::getInputChannels(){
+	return inputChannels;
+}
+int AudioNode::getOutputChannels(){
+	return outputChannels;
+}
+
+void AudioNode::changeNumChannels(int numChannels){
+	inputChannels = numChannels;
+	outputChannels = numChannels;
+	context.numChannels = numChannels;
+	rt_printf("%i change channels to %i\n", ID, numChannels);
+	createBuffers();
+}
+
 void AudioNode::createBuffers(){
-	inputBufferLength = context.numInputs * context.numChannels * context.numAudioFrames;
-	int outputBufferLength = context.numOutputs * context.numChannels * context.numAudioFrames;
+	inputBufferLength = context.numInputs * getInputChannels() * context.numAudioFrames;
+	int outputBufferLength = context.numOutputs * getOutputChannels() * context.numAudioFrames;
+	
+	delete[] context.inputBuffer;
+	delete[] context.outputBuffer;
 	
 	context.inputBuffer = new float[inputBufferLength];
 	context.outputBuffer = new float[outputBufferLength];
@@ -31,7 +53,7 @@ void AudioNode::createBuffers(){
 		context.outputBuffer[i] = 0.0f;
 	}
 	
-	inputWidth = context.numChannels * context.numAudioFrames;
+	inputWidth = getInputChannels() * context.numAudioFrames;
 }
 
 void AudioNode::connectTo(int output, AudioNode* node, int input){
@@ -41,19 +63,31 @@ void AudioNode::connectTo(int output, AudioNode* node, int input){
 	connection.input = input;
 	outputConnections.push_back(connection);
 	
-	node->addInputConnection();
+	node->addInputConnection(getOutputChannels());
+	
+	if (channelCountMode == MAX_CCM && node->getInputChannels() > getOutputChannels()){
+		changeNumChannels(node->getInputChannels());
+	}
 }
 
-void AudioNode::addInputConnection(){
+void AudioNode::addInputConnection(int numChannels){
 	inputConnections += 1;
+	
+	if (channelCountMode == MAX_CCM && numChannels > getInputChannels()){
+		rt_printf("%i %i %i\n", ID, numChannels, getInputChannels());
+		changeNumChannels(numChannels);
+	}
 }
 
-void AudioNode::receiveInput(int input, AudioNodeContext* sourceContext){
+void AudioNode::receiveInput(int input, AudioNode* node){
 	//rt_printf("receiveInput %i\n", input);
 	// assuming they have the same number of channels
-	//rt_printf("before: %f to %f\n", context.inputBuffer[i + input*inputWidth], sourceContext->outputBuffer[i + input*inputWidth]);
-	for (int i=0; i<inputWidth; i++){
-		context.inputBuffer[i + input*inputWidth] += sourceContext->outputBuffer[i + input*inputWidth];
+	if (getInputChannels() == node->getOutputChannels()){
+		for (int i=0; i<inputWidth; i++){
+			context.inputBuffer[i + input*inputWidth] += node->context.outputBuffer[i + input*inputWidth];
+		}
+	} else {
+		rt_printf("error, incompatible channels from %i to %i\n", node->ID, ID);
 	}
 	
 	inputConnectionsReceived += 1;
@@ -68,7 +102,7 @@ void AudioNode::process(){
 	render(&context);
 	
 	for (auto connection : outputConnections){
-		connection.node->receiveInput(connection.input, &context);
+		connection.node->receiveInput(connection.input, this);
 	}
 	
 	// reset input buffer
