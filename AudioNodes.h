@@ -40,6 +40,7 @@ class ChannelSplitterNode : public AudioNode {
 	public:
 		ChannelSplitterNode(int id, int channels) : AudioNode(id, 1, 1, channels, MAX_CCM){
 			changeNumChannels(channels);
+			printf("created %i\n", ID);
 		}
 		
 		void render(){

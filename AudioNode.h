@@ -16,11 +16,13 @@ class AudioNode{
 	public:
 		AudioNode(int id, int inputs, int outputs, int channelCount, int channelCountMode);
 		
-		void connectTo(int output, AudioNode* node, int input);
+		void connectTo(AudioNode* node, int output, int input);
 		
 		void receiveInput(AudioNode* node, const OutputConnection* connection);
 		
 		void resetInputs();
+		
+		int getID();
 		
 	protected:
 		

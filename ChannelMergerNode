@@ -1,0 +1,14 @@
+/***** ChannelMergerNode *****/
+var AudioNode = require('./AudioNode');
+
+class ChannelMergerNode extends AudioNode {
+	
+	constructor(context, ID, inputs){
+		
+		super(context, ID, (inputs || 2), 1, (inputs || 2), 'explicit');
+		
+	}
+	
+}
+
+module.exports = ChannelMergerNode;

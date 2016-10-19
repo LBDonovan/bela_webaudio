@@ -63,13 +63,13 @@ void AudioNode::createBuffers(){
 
 }
 
-void AudioNode::connectTo(int output, AudioNode* node, int input){
+void AudioNode::connectTo(AudioNode* node, int output, int input){
 	
 	printf("connecting %i output %i to %i input %i\n", ID, output, node->ID, input);
 	
 	OutputConnection connection;
-	connection.output = output;
 	connection.node = node;
+	connection.output = output;
 	connection.input = input;
 	outputConnections.push_back(connection);
 	
@@ -156,5 +156,9 @@ void AudioNode::resetOutputs(){
 			std::fill(channel.begin(), channel.end(), 0.0f);
 		}
 	}
+}
+
+int AudioNode::getID(){
+	return ID;
 }
 
