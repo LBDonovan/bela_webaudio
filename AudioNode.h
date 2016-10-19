@@ -50,12 +50,15 @@ class AudioNode{
 		int channelCount;
 		int channelCountMode;
 
-		void changeNumChannels(int numChannels);
+		virtual void changeNumChannels(int numChannels);
 		
 		void createBuffers();
 		void process();
 		
 		void resetOutputs();
+		
+	private:
+		bool printedMixing;
 		
 };
 

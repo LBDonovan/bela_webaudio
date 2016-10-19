@@ -14,7 +14,8 @@ AudioNode::AudioNode(int id, int inputs, int outputs, int channelCount, int chan
 	inputConnectionsReceived(0),
 	ID(id),
 	channelCount(channelCount),
-	channelCountMode(channelCountMode)
+	channelCountMode(channelCountMode),
+	printedMixing(false)
 {
 	createBuffers();
 };
@@ -63,6 +64,9 @@ void AudioNode::createBuffers(){
 }
 
 void AudioNode::connectTo(int output, AudioNode* node, int input){
+	
+	printf("connecting %i output %i to %i input %i\n", ID, output, node->ID, input);
+	
 	OutputConnection connection;
 	connection.output = output;
 	connection.node = node;
@@ -72,6 +76,7 @@ void AudioNode::connectTo(int output, AudioNode* node, int input){
 	node->addInputConnection(outputChannels);
 	
 	if (channelCountMode == MAX_CCM && node->inputChannels > outputChannels){
+		printf("%i changing num channels connectTo\n", ID);
 		changeNumChannels(node->inputChannels);
 	}
 }
@@ -79,8 +84,10 @@ void AudioNode::connectTo(int output, AudioNode* node, int input){
 void AudioNode::addInputConnection(int numChannels){
 	inputConnections += 1;
 	
+	printf("receiving connection from to %i\n", ID);
+	
 	if (channelCountMode == MAX_CCM && numChannels > inputChannels){
-		rt_printf("%i %i %i\n", ID, numChannels, inputChannels);
+		printf("%i changing num channels addInputConnection\n", ID);
 		changeNumChannels(numChannels);
 	}
 }
@@ -88,19 +95,34 @@ void AudioNode::addInputConnection(int numChannels){
 void AudioNode::receiveInput(AudioNode* node, const OutputConnection* connection){
 	
 	// printf("node %i input %i receive from node %i output %i\n", ID, connection->input, node->ID, connection->output);
-	// printf("inputs %i\n", inputBuffer.size());
-	// printf("input channels %i\n", inputBuffer[connection->input].size());
-	// printf("frames %i %i\n", inputBuffer[connection->input][0].size(), inputBuffer[connection->input][1].size());
+	// printf("inputs %i (should be %i)\n", inputBuffer.size(), inputs);
+	// printf("input channels %i (should be %i)\n", inputBuffer.at(connection->input).size(), inputChannels);
+	// printf("frames %i %i\n", inputBuffer.at(connection->input).at(0).size(), inputBuffer.at(connection->input).at(1).size());
 	
 	// assuming they have the same number of channels
 	if (inputChannels == node->outputChannels){
 		for (int ch = 0; ch<inputChannels; ch++){
 			for (int f = 0; f<audioFrames; f++){
-				inputBuffer[connection->input][ch][f] += node->outputBuffer[connection->output][ch][f];
+				inputBuffer.at(connection->input).at(ch).at(f) += node->outputBuffer.at(connection->output).at(ch).at(f);
 			}
 		}
 	} else {
-		rt_printf("error, incompatible channels from %i to %i\n", node->ID, ID);
+		if (!printedMixing){
+			printedMixing = true;
+			rt_printf("mixing! node %i output %i to node %i input %i\n", node->ID, connection->output, ID, connection->input);
+			// printf("%i to %i (really %i) channels\n", node->outputChannels, inputChannels, inputBuffer[0][1].size());
+		}
+		
+		for (int inch = 0; inch < inputChannels; inch++){
+			// printf("inch: %i\n", inch);
+			for (int outch = 0; outch < node->outputChannels; outch++){
+				// printf("outch: %i\n", outch);
+				for (int f = 0; f<audioFrames; f++){
+					// printf("f: %i\n", f);
+					inputBuffer.at(connection->input).at(inch).at(f) += node->outputBuffer.at(connection->output).at(outch).at(f);
+				}
+			}
+		}
 	}
 	
 	inputConnectionsReceived += 1;

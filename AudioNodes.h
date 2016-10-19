@@ -36,29 +36,56 @@ class AudioDestinationNode : public AudioNode {
 		}
 };
 
-// class ChannelSplitterNode : public AudioNode {
-// 	public:
-// 		ChannelSplitterNode(int id) : AudioNode(id, 1, 1, 1, MAX_CCM){}
+class ChannelSplitterNode : public AudioNode {
+	public:
+		ChannelSplitterNode(int id, int channels) : AudioNode(id, 1, 1, channels, MAX_CCM){
+			changeNumChannels(channels);
+		}
 		
-// 		void render(){
-// 			for (int i = 0; i<context->numOutputs; i++){
-// 				context->outputBuffer[]
-// 			}
-// 		}
+		void render(){
+			for (int ch = 0; ch<inputChannels; ch++){
+				std::copy(inputBuffer[0][ch].begin(), inputBuffer[0][ch].end(), outputBuffer[ch][0].begin());
+			}
+		}
 		
-// 	protected:
-// 		void changeNumChannels(int numChannels){
+	protected:
+		virtual void changeNumChannels(int numChannels){
 			
-// 			inputChannels = numChannels;
-// 			context.numChannels = numChannels;
+			inputChannels = numChannels;
+			outputChannels = 1;
 			
-// 			outputChannels = 1;
-// 			context.numOutputs = numChannels;
+			inputs = 1;
+			outputs = numChannels;
 			
-// 			rt_printf("%i change input channels to %i\n", ID, numChannels);
-// 			createBuffers();
-// 		}
-// };
+			printf("%i ChannelSplitterNode change outputs & input channels to %i\n", ID, numChannels);
+			createBuffers();
+		}
+};
+class ChannelMergerNode : public AudioNode {
+	public:
+		ChannelMergerNode(int id, int channels) : AudioNode(id, 1, 1, channels, EXPLICIT_CCM){
+			changeNumChannels(channels);
+		}
+		
+		void render(){
+			for (int ch = 0; ch < outputChannels; ch++){
+				std::copy(inputBuffer[ch][0].begin(), inputBuffer[ch][0].end(), outputBuffer[0][ch].begin());
+			}
+		}
+		
+	protected:
+		virtual void changeNumChannels(int numChannels){
+			
+			inputChannels = 1;
+			outputChannels = numChannels;
+			
+			inputs = numChannels;
+			outputs = 1;
+			
+			printf("%i ChannelMergerNode change inputs & output channels to %i\n", ID, numChannels);
+			createBuffers();
+		}
+};
 
 class GainNode : public AudioNode {
 	public:

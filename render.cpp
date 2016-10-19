@@ -12,7 +12,10 @@ OSCClient oscClient;
 
 AudioSourceNode source(0);
 AudioDestinationNode destination(1);
-GainNode gain(2, 10.0);
+ChannelSplitterNode splitter(2, 2);
+ChannelMergerNode merger(3, 2);
+GainNode gainl(4, 10.0);
+GainNode gainr(5, 5.0);
 
 std::vector<AudioNode*> nodes;
 
@@ -37,17 +40,23 @@ bool setup(BelaContext *context, void *userData)
     nodes.reserve(4096);
     
     nodes.push_back(&destination);
-    nodes.push_back(&gain);
+    nodes.push_back(&splitter);
+    nodes.push_back(&merger);
+    nodes.push_back(&gainl);
+    nodes.push_back(&gainr);
     
     rt_printf("%i\n", nodes.size());
     
-    source.connectTo(0, &gain, 0);
-    gain.connectTo(0, &destination, 0);
-    // source.connectTo(0, &destination, 0);
-    
+    source.connectTo(0, &gainl, 0);
+    gainl.connectTo(0, &merger, 0);
+    // splitter.connectTo(1, &gainr, 0);
+    // gainl.connectTo(0, &destination, 0);
+    // gainr.connectTo(0, &merger, 1);
+    merger.connectTo(0, &destination, 0);
+
     // the following code sends an OSC message to address /osc-setup
     // then waits 1 second for a reply on /osc-setup-reply
-    /*bool handshakeReceived = false;
+    bool handshakeReceived = false;
     oscClient.sendMessageNow(oscClient.newMessage.to("/osc-setup").end());
     oscServer.receiveMessageNow(1000);
     while (oscServer.messageWaiting()){
@@ -60,7 +69,7 @@ bool setup(BelaContext *context, void *userData)
         rt_printf("handshake received!\n");
     } else {
         rt_printf("timeout!\n");
-    }*/
+    }
     
 	return true;
 }
@@ -69,9 +78,9 @@ bool done = false;
 void render(BelaContext *context, void *userData)
 {
     // receive OSC messages, parse them, and send back an acknowledgment
-    /*while (oscServer.messageWaiting()){
+    while (oscServer.messageWaiting()){
         parseMessage(oscServer.popMessage());
-    }*/
+    }
     
     if (!done){
     	//done = true;
