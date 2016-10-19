@@ -77,8 +77,6 @@ void render(BelaContext *context, void *userData)
     	//done = true;
     	source.receiveInterleavedInput(context);
 	    destination.setInterleavedOutput(context);
-	    // gain.resetInputs();
-	    // destination.resetInputs();
     }
     
     for (auto node : nodes){

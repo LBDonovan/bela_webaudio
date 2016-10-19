@@ -10,17 +10,6 @@
 #define CLAMPED_MAX_CCM 1
 #define EXPLICIT_CCM 2
 
-struct AudioNodeContext{
-	AudioNodeContext() : inputBuffer(NULL), outputBuffer(NULL){}
-	int numInputs;
-	int numOutputs;
-	int numChannels;
-	int numAudioFrames;
-	int sampleRate;
-	float* inputBuffer;
-	float* outputBuffer;
-};
-
 struct OutputConnection;
 
 class AudioNode{
@@ -29,15 +18,25 @@ class AudioNode{
 		
 		void connectTo(int output, AudioNode* node, int input);
 		
-		void receiveInput(int input, AudioNode* node);
+		void receiveInput(AudioNode* node, const OutputConnection* connection);
 		
 		void resetInputs();
 		
 	protected:
 		
-		AudioNodeContext context;
+		int inputs;
+		int outputs;
 		
-		virtual void render(AudioNodeContext* context){};
+		int inputChannels;
+		int outputChannels;
+		
+		int audioFrames;
+		int sampleRate;
+		
+		std::vector<std::vector<std::vector<float>>> inputBuffer;
+		std::vector<std::vector<std::vector<float>>> outputBuffer;
+		
+		virtual void render(){};
 		
 		void addInputConnection(int numChannels);
 		
@@ -50,20 +49,13 @@ class AudioNode{
 		
 		int channelCount;
 		int channelCountMode;
-		
-		int getInputChannels();
-		int getOutputChannels();
-		void changeNumChannels(int numChannels);
 
-		int inputWidth;
-		int inputBufferLength;
-		//int outputBufferLength;
-		
-		int inputChannels;
-		int outputChannels;
+		void changeNumChannels(int numChannels);
 		
 		void createBuffers();
 		void process();
+		
+		void resetOutputs();
 		
 };
 
