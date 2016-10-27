@@ -16,7 +16,7 @@ var preSetupBuffer = {
 
 var socket;
 
-var time = 0, lastTime = 0;
+var time = 0, lastTime = 0, startTime = 0;
 
 class AudioContextOSC extends EventEmitter{
 	

@@ -2,6 +2,7 @@
 var EventEmitter = require('events').EventEmitter;
 var spawn = require('child_process').spawn;
 var osc = require('./AudioContextOSC');
+var present = require('present');
 
 var AudioNode = require('./AudioNode');
 var AudioDestinationNode = require('./AudioDestinationNode');
@@ -11,7 +12,7 @@ var ChannelMergerNode = require('./ChannelMergerNode');
 
 var IDcount = 0;
 
-var _state = 'suspended';
+var _state = 'suspended', _startTime = 0;
 
 class AudioContext extends EventEmitter {
 	
@@ -34,8 +35,8 @@ class AudioContext extends EventEmitter {
 		});
 		
 		osc.on('start', timestamp => {
-			console.log('audio started');
 			_state = 'running';
+			_startTime = timestamp;
 			this.onstatechange();
 		});
 		
@@ -58,6 +59,10 @@ class AudioContext extends EventEmitter {
 			'onstatechange': {
 				value: function(){},
 				writable: true
+			},
+			
+			'currentTime': {
+				get: () => (present() - _startTime)/1000
 			}
 			
 		});
@@ -85,9 +90,3 @@ class AudioContext extends EventEmitter {
 }
 
 module.exports = AudioContext;
-
-class AudioContextState extends String {
-	constructor(args){
-		super(args);
-	}
-}

@@ -5,6 +5,7 @@ var ctx = new AudioContext();
 
 ctx.onstatechange = function() {
   console.log('STATE', ctx.state);
+  setInterval( () => console.log(ctx.currentTime), 1000);
 }
 
 var splitter = ctx.createChannelSplitter(2);

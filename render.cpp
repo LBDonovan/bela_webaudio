@@ -122,10 +122,10 @@ void render(BelaContext *context, void *userData)
     while (oscServer.messageWaiting()){
         parseMessage(oscServer.popMessage());
     }
-    
+
+	// send a timestamp once a second    
     for (int n=0; n<context->audioFrames; n++){
 	    if (!(count++%44100)){
-	    	rt_printf("count: %i\n", count);
 	    	oscClient.queueMessage(oscClient.newMessage.to("/osc-timestamp").add(count).end());
 	    }
     }
