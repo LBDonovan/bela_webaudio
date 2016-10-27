@@ -3,6 +3,10 @@ var AudioContext = require('./AudioContext');
 
 var ctx = new AudioContext();
 
+ctx.onstatechange = function() {
+  console.log('STATE', ctx.state);
+}
+
 var splitter = ctx.createChannelSplitter(2);
 var merger = ctx.createChannelMerger(2);
 
@@ -18,3 +22,4 @@ gainl.connect(merger, 0, 0);
 gainr.connect(merger, 0, 1);
 
 merger.connect(ctx.destination);
+

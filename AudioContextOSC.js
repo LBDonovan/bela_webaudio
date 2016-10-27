@@ -2,6 +2,7 @@
 var EventEmitter = require('events').EventEmitter;
 var dgram = require('dgram');
 var osc = require('osc-min');
+var present = require('present');
 
 // port numbers
 var OSC_RECEIVE = 3426;
@@ -108,9 +109,12 @@ function parseMessage(msg, emitter){
 		if (preSetupBuffer.elements.length)
 			sendOSC(preSetupBuffer);
 	} else if (address[1] === 'osc-timestamp'){
-		time = performance.now();
-		console.log(lastTime - time);
-		lastTime = time;
+		if (msg.args[0].value == 1){
+			startTime = present();
+			emitter.emit('start', startTime);
+		} else if (Math.abs(msg.args[0].value/44100 - (present()-startTime)/1000) > 0.1){
+			console.log('Timestamp latency:', msg.args[0].value/44100 - (present()-startTime)/1000);
+		}
 	}
 }
 

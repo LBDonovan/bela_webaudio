@@ -11,6 +11,8 @@ var ChannelMergerNode = require('./ChannelMergerNode');
 
 var IDcount = 0;
 
+var _state = 'suspended';
+
 class AudioContext extends EventEmitter {
 	
 	constructor(){
@@ -31,16 +33,33 @@ class AudioContext extends EventEmitter {
 			});
 		});
 		
-		// create the AudioSourceNode
-		Object.defineProperty(this, 'source', {
-		    value: new AudioNode(this, IDcount++, 0, 1, 2, 'explicit'),
-		    writable: false
+		osc.on('start', timestamp => {
+			console.log('audio started');
+			_state = 'running';
+			this.onstatechange();
 		});
 		
-		// create the AudioDestinationNode
-		Object.defineProperty(this, 'destination', {
-		    value: new AudioDestinationNode(this, IDcount++),
-		    writable: false
+		Object.defineProperties(this, {
+			
+			'source': {
+			    value: new AudioNode(this, IDcount++, 0, 1, 2, 'explicit'),
+			    writable: false
+			},
+			
+			'destination': {
+			    value: new AudioDestinationNode(this, IDcount++),
+			    writable: false
+			},
+			
+			'state': {
+			    get: () => _state
+			},
+			
+			'onstatechange': {
+				value: function(){},
+				writable: true
+			}
+			
 		});
 		
 	}
@@ -66,3 +85,9 @@ class AudioContext extends EventEmitter {
 }
 
 module.exports = AudioContext;
+
+class AudioContextState extends String {
+	constructor(args){
+		super(args);
+	}
+}
