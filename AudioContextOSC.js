@@ -15,6 +15,8 @@ var preSetupBuffer = {
 
 var socket;
 
+var time = 0, lastTime = 0;
+
 class AudioContextOSC extends EventEmitter{
 	
 	constructor(){
@@ -105,6 +107,10 @@ function parseMessage(msg, emitter){
 		emitter.emit('setup');
 		if (preSetupBuffer.elements.length)
 			sendOSC(preSetupBuffer);
+	} else if (address[1] === 'osc-timestamp'){
+		time = performance.now();
+		console.log(lastTime - time);
+		lastTime = time;
 	}
 }
 

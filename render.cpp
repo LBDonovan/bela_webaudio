@@ -115,11 +115,19 @@ bool setup(BelaContext *context, void *userData)
 }
 
 bool done = false;
+int count = 0;
 void render(BelaContext *context, void *userData)
 {
     // receive OSC messages, parse them, and send back an acknowledgment
     while (oscServer.messageWaiting()){
         parseMessage(oscServer.popMessage());
+    }
+    
+    for (int n=0; n<context->audioFrames; n++){
+	    if (!(count++%44100)){
+	    	rt_printf("count: %i\n", count);
+	    	oscClient.queueMessage(oscClient.newMessage.to("/osc-timestamp").add(count).end());
+	    }
     }
     
     if (!done){
