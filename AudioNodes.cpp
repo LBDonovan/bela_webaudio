@@ -61,8 +61,24 @@ void GainNode::render(){
 	for (int i = 0; i<inputs; i++){
 		for (int ch = 0; ch<inputChannels; ch++){
 			for (int f = 0; f<audioFrames; f++){
-				outputBuffer[i][ch][f] = inputBuffer[i][ch][f] * gain;
+				outputBuffer[i][ch][f] = inputBuffer[i][ch][f] * params[0]->getValueAt(f);
 			}
 		}
 	}
+}
+
+void AudioParam::process(){
+	if (inputConnectionsReceived < inputConnections){
+		return;
+	}
+	// param events need to be implemented here
+	parent->receiveParam();
+}
+
+float AudioParam::getValueAt(int index){
+	return inputBuffer[0][0].at(index);
+}
+
+void AudioParam::resetInputs(){
+	std::fill(inputBuffer[0][0].begin(), inputBuffer[0][0].end(), value);
 }

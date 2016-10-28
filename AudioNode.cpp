@@ -3,7 +3,7 @@
 #include <AudioNodes.h>
 #include <Bela.h>
 
-AudioNode::AudioNode(int id, int inputs, int outputs, int channelCount, int channelCountMode):
+AudioNode::AudioNode(int id, int inputs, int outputs, int channelCount, int channelCountMode, int numParams):
 	inputs(inputs),
 	outputs(outputs),
 	inputChannels(channelCount),
@@ -12,12 +12,14 @@ AudioNode::AudioNode(int id, int inputs, int outputs, int channelCount, int chan
 	sampleRate(44100),
 	inputConnections(0),
 	inputConnectionsReceived(0),
+	paramsReceived(0),
 	ID(id),
 	channelCount(channelCount),
 	channelCountMode(channelCountMode),
 	printedMixing(false)
 {
 	createBuffers();
+	params.reserve(numParams);
 };
 
 void AudioNode::changeNumChannels(int numChannels){
@@ -91,6 +93,10 @@ void AudioNode::addInputConnection(int numChannels){
 		changeNumChannels(numChannels);
 	}
 }
+void AudioNode::addParam(AudioNode* param){
+	printf("receiving parameter connection to %i\n", ID);
+	params.push_back(param);
+}
 
 void AudioNode::receiveInput(AudioNode* node, const OutputConnection* connection){
 	
@@ -127,13 +133,31 @@ void AudioNode::receiveInput(AudioNode* node, const OutputConnection* connection
 	
 	inputConnectionsReceived += 1;
 	if (inputConnectionsReceived >= inputConnections){
-		process();
+		if (paramsReceived >= params.size()){
+			process();
+		} else {
+			processParams();
+		}
 	}
 	
 }
 
+void AudioNode::processParams(){
+	for (auto param : params){
+		param->process();
+	}
+}
+
+void AudioNode::receiveParam(){
+	paramsReceived += 1;
+	if (paramsReceived >= params.size() && inputConnectionsReceived >= inputConnections){
+		process();
+	}
+}
+
 void AudioNode::process(){
 	//rt_printf("process\n");
+
 	render();
 	
 	for (auto connection : outputConnections){
@@ -141,6 +165,7 @@ void AudioNode::process(){
 	}
 
 	inputConnectionsReceived = 0;
+	paramsReceived = 0;
 }
 
 void AudioNode::resetInputs(){

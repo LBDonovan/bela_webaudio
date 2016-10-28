@@ -38,16 +38,15 @@ void parseMessage(oscpkt::Message msg){
     	
     	if (msg.match("/create-node/GainNode")
 	    	.popInt32(intArgs[0])
-	    	.popInt32(intArgs[1])
 	    	.isOkNoMoreArgs())
 		{
 			
-	        printf("creating gain node %i %i\n", intArgs[0], intArgs[1]);
+	        printf("creating gain node %i\n", intArgs[0]);
 	        if (intArgs[0] != nodes.size()){
 	        	fprintf(stderr, "can't create node, wrong ID\n");
 	        	return;
 	        }
-	        nodes.push_back(new GainNode(intArgs[0], (float)intArgs[1]));
+	        nodes.push_back(new GainNode(intArgs[0]));
 	        
 	    } else if (msg.match("/create-node/ChannelSplitterNode")
 	    	.popInt32(intArgs[0])
