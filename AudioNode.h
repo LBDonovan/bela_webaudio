@@ -27,7 +27,7 @@ class AudioNode{
 		
 		int getID();
 		
-		virtual float getValueAt(int index);
+		virtual float getValueAt(int index){return 0.0f;};
 		
 	protected:
 		
