@@ -14,7 +14,7 @@ struct OutputConnection;
 
 class AudioNode{
 	public:
-		AudioNode(int id, int inputs, int outputs, int channelCount, int channelCountMode, int numParams);
+		AudioNode(int id, int inputs, int outputs, int channelCount, int channelCountMode);
 		
 		void connectTo(AudioNode* node, int output, int input);
 		
@@ -22,6 +22,7 @@ class AudioNode{
 		
 		void addParam(AudioNode* param);
 		void receiveParam();
+		void processParams();
 		
 		virtual void resetInputs();
 		
@@ -29,6 +30,8 @@ class AudioNode{
 		
 		virtual float getValueAt(int index){return 0.0f;};
 		virtual void setValue(float val){};
+		virtual void setType(int _type){};
+		virtual void setState(int _type){};
 		
 	protected:
 		
@@ -39,7 +42,8 @@ class AudioNode{
 		int outputChannels;
 		
 		int audioFrames;
-		int sampleRate;
+		float sampleRate;
+		float inverseSampleRate;
 		
 		std::vector<std::vector<std::vector<float>>> inputBuffer;
 		std::vector<std::vector<std::vector<float>>> outputBuffer;
@@ -70,7 +74,6 @@ class AudioNode{
 		
 	private:
 		bool printedMixing;
-		void processParams();
 		
 };
 

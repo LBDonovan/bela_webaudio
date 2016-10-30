@@ -3,12 +3,12 @@ var AudioNode = require('./AudioNode');
 
 class GainNode extends AudioNode {
 	
-	constructor(context, ID, param){
+	constructor(context, ID, gainParam){
 		
 		super(context, ID, 1, 1, 1, 'max');
 		
 		Object.defineProperty(this, 'gain', {
-		    value: param,
+		    value: gainParam,
 		    writable: false
 		});
 		

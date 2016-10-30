@@ -14,6 +14,7 @@ AudioSourceNode source(0);
 AudioDestinationNode destination(1);
 
 std::vector<AudioNode*> nodes;
+std::vector<OscillatorNode*> oscillatorNodes;
 
 // parse messages received by OSC Server
 void parseMessage(oscpkt::Message msg){
@@ -75,7 +76,22 @@ void parseMessage(oscpkt::Message msg){
 	        }
 	        nodes.push_back(new ChannelMergerNode(intArgs[0], intArgs[1]));
 	        
-	    } 
+	    } else if (msg.match("/create-node/OscillatorNode")
+	    	.popInt32(intArgs[0])
+	    	.popInt32(intArgs[1])
+	    	.isOkNoMoreArgs())
+		{
+			
+	        printf("creating oscillator node %i\n", intArgs[0]);
+	        if (intArgs[0] != nodes.size()){
+	        	fprintf(stderr, "can't create OscillatorNode, wrong ID\n");
+	        	return;
+	        }
+	        OscillatorNode* node = new OscillatorNode(intArgs[0]);
+	        oscillatorNodes.push_back(node);
+	        nodes.push_back(node);
+	        
+	    }
 	    
     } else if (msg.match("/create-param")
     	.popInt32(intArgs[0])
@@ -97,6 +113,23 @@ void parseMessage(oscpkt::Message msg){
     {
     	printf("setting param %i to value %f\n", intArgs[0], floatArgs[0]);
     	nodes[intArgs[0]]->setValue(floatArgs[0]);
+    	
+    } else if (msg.match("/set-osc-type")
+	    	.popInt32(intArgs[0])
+	    	.popInt32(intArgs[1])
+	    	.isOkNoMoreArgs())
+	{
+		printf("setting type of oscillator node %i to %i\n", intArgs[0], intArgs[1]);
+    	nodes[intArgs[0]]->setType(intArgs[1]);
+        
+    } else if (msg.match("/set-osc-state")
+	    	.popInt32(intArgs[0])
+	    	.popInt32(intArgs[1])
+	    	.isOkNoMoreArgs())
+	{
+		printf("setting state of oscillator node %i to %i\n", intArgs[0], intArgs[1]);
+    	nodes[intArgs[0]]->setState(intArgs[1]);
+        
     }
 
 }
@@ -151,11 +184,12 @@ void render(BelaContext *context, void *userData)
 	    }
     }
     
-    if (!done){
-    	//done = true;
-    	source.receiveInterleavedInput(context);
-	    destination.setInterleavedOutput(context);
+    for (auto node : oscillatorNodes){
+    	node->processParams();
     }
+    
+	source.receiveInterleavedInput(context);
+    destination.setInterleavedOutput(context);
     
     for (auto node : nodes){
     	node->resetInputs();

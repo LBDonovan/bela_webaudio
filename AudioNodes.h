@@ -8,7 +8,7 @@
 
 class AudioParam : public AudioNode {
 	public:
-		AudioParam(int id, AudioNode* parent, float val) : AudioNode(id, 1, 0, 1, EXPLICIT_CCM, 0), parent(parent), value(val){
+		AudioParam(int id, AudioNode* parent, float val) : AudioNode(id, 1, 0, 1, EXPLICIT_CCM), parent(parent), value(val){
 			parent->addParam(this);
 		}
 		void resetInputs();
@@ -23,19 +23,19 @@ class AudioParam : public AudioNode {
 
 class AudioSourceNode : public AudioNode {
 	public:
-		AudioSourceNode(int id) : AudioNode(id, 0, 1, 2, EXPLICIT_CCM, 0){}
+		AudioSourceNode(int id) : AudioNode(id, 0, 1, 2, EXPLICIT_CCM){}
 		void receiveInterleavedInput(BelaContext* ctx);
 };
 
 class AudioDestinationNode : public AudioNode {
 	public:
-		AudioDestinationNode(int id) : AudioNode(id, 1, 0, 2, EXPLICIT_CCM, 0){}
+		AudioDestinationNode(int id) : AudioNode(id, 1, 0, 2, EXPLICIT_CCM){}
 		void setInterleavedOutput(BelaContext* ctx);
 };
 
 class ChannelSplitterNode : public AudioNode {
 	public:
-		ChannelSplitterNode(int id, int channels) : AudioNode(id, 1, 1, channels, MAX_CCM, 0){
+		ChannelSplitterNode(int id, int channels) : AudioNode(id, 1, 1, channels, MAX_CCM){
 			changeNumChannels(channels);
 			// printf("created %i\n", ID);
 		}
@@ -45,7 +45,7 @@ class ChannelSplitterNode : public AudioNode {
 };
 class ChannelMergerNode : public AudioNode {
 	public:
-		ChannelMergerNode(int id, int channels) : AudioNode(id, 1, 1, channels, EXPLICIT_CCM, 0){
+		ChannelMergerNode(int id, int channels) : AudioNode(id, 1, 1, channels, EXPLICIT_CCM){
 			changeNumChannels(channels);
 		}
 		void render();
@@ -55,8 +55,20 @@ class ChannelMergerNode : public AudioNode {
 
 class GainNode : public AudioNode {
 	public:
-		GainNode(int id) : AudioNode(id, 1, 1, 1, MAX_CCM, 0){}
+		GainNode(int id) : AudioNode(id, 1, 1, 1, MAX_CCM){}
 		void render();
+};
+
+class OscillatorNode : public AudioNode {
+	public:
+		OscillatorNode(int id) : AudioNode(id, 0, 1, 1, MAX_CCM){}
+		void render();
+		void setType(int _type);
+		void setState(int _state);
+	private:
+		float phase = 0.0f;
+		int type = -1;
+		int state = 0;
 };
 
 #endif

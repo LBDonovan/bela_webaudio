@@ -3,13 +3,13 @@
 #include <AudioNodes.h>
 #include <Bela.h>
 
-AudioNode::AudioNode(int id, int inputs, int outputs, int channelCount, int channelCountMode, int numParams):
+AudioNode::AudioNode(int id, int inputs, int outputs, int channelCount, int channelCountMode):
 	inputs(inputs),
 	outputs(outputs),
 	inputChannels(channelCount),
 	outputChannels(channelCount),
 	audioFrames(16),
-	sampleRate(44100),
+	sampleRate(44100.0f),
 	inputConnections(0),
 	inputConnectionsReceived(0),
 	paramsReceived(0),
@@ -18,8 +18,8 @@ AudioNode::AudioNode(int id, int inputs, int outputs, int channelCount, int chan
 	channelCountMode(channelCountMode),
 	printedMixing(false)
 {
+	inverseSampleRate = 1.0f/sampleRate;
 	createBuffers();
-	params.reserve(numParams);
 };
 
 void AudioNode::changeNumChannels(int numChannels){

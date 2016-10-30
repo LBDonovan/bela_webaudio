@@ -126,6 +126,40 @@ class AudioContextOSC extends EventEmitter{
 			]
 		});
 	}
+	
+	setOscillatorType(node, type){
+		console.log('setting oscillator type to', type);
+		sendOSC({
+			address : '/set-osc-type',
+			args	: [
+				{
+					type	: 'integer',
+					value	: node.ID
+				},
+				{
+					type	: 'integer',
+					value	: type
+				}
+			]
+		})
+	}
+	
+	setOscillatorState(node, state){
+		console.log('setting oscillator state to', state);
+		sendOSC({
+			address : '/set-osc-state',
+			args	: [
+				{
+					type	: 'integer',
+					value	: node.ID
+				},
+				{
+					type	: 'integer',
+					value	: state
+				}
+			]
+		})
+	}
 }
 
 module.exports = new AudioContextOSC();

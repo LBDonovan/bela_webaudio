@@ -17,7 +17,6 @@ class AudioParam extends AudioNode {
 		    get: () => _value,
 		    set: val => {
 		    	_value = val;
-		    	console.log('setting param value', val);
 		    	osc.setParamValue(this);
 		    }
 		});

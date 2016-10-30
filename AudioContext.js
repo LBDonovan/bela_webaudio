@@ -10,6 +10,7 @@ var AudioDestinationNode = require('./AudioDestinationNode');
 var GainNode = require('./GainNode');
 var ChannelSplitterNode = require('./ChannelSplitterNode');
 var ChannelMergerNode = require('./ChannelMergerNode');
+var OscillatorNode = require('./OscillatorNode');
 
 var IDcount = 0;
 
@@ -71,7 +72,11 @@ class AudioContext extends EventEmitter {
 	}
 	
 	createGain(gain){
-		var node = new GainNode(this, IDcount++, new AudioParam(this, IDcount++, gain));
+		var node = new GainNode(
+			this, 
+			IDcount++, 
+			new AudioParam(this, IDcount++, gain)
+		);
 		osc.createNode('GainNode', node);
 		osc.createParam(node, node.gain);
 		return node;
@@ -86,6 +91,19 @@ class AudioContext extends EventEmitter {
 	createChannelMerger(numberOfInputs){
 		var node = new ChannelMergerNode(this, IDcount++, numberOfInputs);
 		osc.createNode('ChannelMergerNode', node);
+		return node;
+	}
+	
+	createOscillator(){
+		var node = new OscillatorNode(
+			this, 
+			IDcount++, 
+			new AudioParam(this, IDcount++, 440),	// frequency
+			new AudioParam(this, IDcount++, 0)		// detune
+		);
+		osc.createNode('OscillatorNode', node);
+		osc.createParam(node, node.frequency);
+		osc.createParam(node, node.detune);
 		return node;
 	}
 	
