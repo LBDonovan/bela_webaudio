@@ -48,7 +48,7 @@ class AudioContextOSC extends EventEmitter{
 	}
 	
 	createNode(name, node){
-		console.log('creating node', name, node.ID, (node.gain || node.channelCount));
+		console.log('creating node', name, node.ID);
 		sendOSC({
 			address : '/create-node/'+name,
 			args	: [
@@ -58,7 +58,28 @@ class AudioContextOSC extends EventEmitter{
 				},
 				{
 					type	: 'integer',
-					value	: (node.gain || node.channelCount)
+					value	: node.channelCount
+				}
+			]
+		})
+	}
+	
+	createParam(parent, param){
+		console.log('creating param', param.ID, parent.ID);
+		sendOSC({
+			address: '/create-param',
+			args: [
+				{
+					type	: 'integer',
+					value	: param.ID
+				},
+				{
+					type	: 'integer',
+					value	: parent.ID
+				},
+				{
+					type	: 'float',
+					value	: param.value
 				}
 			]
 		})
@@ -84,6 +105,23 @@ class AudioContextOSC extends EventEmitter{
 				{
 					type	: 'integer',
 					value	: input
+				}
+			]
+		});
+	}
+	
+	setParamValue(param){
+		console.log('setting param value');
+		sendOSC({
+			address	: '/set-param',
+			args	: [
+				{
+					type	: 'integer',
+					value	: param.ID
+				},
+				{
+					type	: 'float',
+					value	: param.value
 				}
 			]
 		});

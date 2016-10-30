@@ -20,8 +20,8 @@ void parseMessage(oscpkt::Message msg){
     
     printf("received message to: %s\n", msg.addressPattern().c_str());
     
-    std::vector<int> intArgs(4);
-    // float floatArg;
+    int intArgs[4];
+    float floatArgs[4];
     
     if (msg.match("/connect-nodes")
     	.popInt32(intArgs[0])
@@ -35,31 +35,32 @@ void parseMessage(oscpkt::Message msg){
         nodes[intArgs[0]]->connectTo(nodes[intArgs[1]], intArgs[2], intArgs[3]);
         
     } else if (msg.partialMatch("/create-node/")){
-    	
+		
     	if (msg.match("/create-node/GainNode")
-	    	.popInt32(intArgs[0])
-	    	.isOkNoMoreArgs())
-		{
-			
-	        printf("creating gain node %i\n", intArgs[0]);
-	        if (intArgs[0] != nodes.size()){
-	        	fprintf(stderr, "can't create node, wrong ID\n");
-	        	return;
-	        }
-	        nodes.push_back(new GainNode(intArgs[0]));
-	        
-	    } else if (msg.match("/create-node/ChannelSplitterNode")
 	    	.popInt32(intArgs[0])
 	    	.popInt32(intArgs[1])
 	    	.isOkNoMoreArgs())
 		{
 			
-	        printf("creating channel splitter node %i %i\n", intArgs[0], intArgs[1]);
-	        if (intArgs[0] != nodes.size()){
-	        	fprintf(stderr, "can't create node, wrong ID\n");
-	        	return;
-	        }
-	        nodes.push_back(new ChannelSplitterNode(intArgs[0], intArgs[1]));
+			printf("creating gain node %i\n", intArgs[0]);
+			if (intArgs[0] != nodes.size()){
+				fprintf(stderr, "can't create GainNode, wrong ID\n");
+				return;
+			}
+			nodes.push_back(new GainNode(intArgs[0]));
+
+		} else if (msg.match("/create-node/ChannelSplitterNode")
+			.popInt32(intArgs[0])
+			.popInt32(intArgs[1])
+			.isOkNoMoreArgs())
+		{
+			
+			printf("creating channel splitter node %i %i\n", intArgs[0], intArgs[1]);
+			if (intArgs[0] != nodes.size()){
+				fprintf(stderr, "can't create ChannelSplitterNode, wrong ID\n");
+				return;
+			}
+			nodes.push_back(new ChannelSplitterNode(intArgs[0], intArgs[1]));
 	        
 	    } else if (msg.match("/create-node/ChannelMergerNode")
 	    	.popInt32(intArgs[0])
@@ -69,14 +70,35 @@ void parseMessage(oscpkt::Message msg){
 			
 	        printf("creating channel merger node %i %i\n", intArgs[0], intArgs[1]);
 	        if (intArgs[0] != nodes.size()){
-	        	fprintf(stderr, "can't create node, wrong ID\n");
+	        	fprintf(stderr, "can't create ChannelMergerNode, wrong ID\n");
 	        	return;
 	        }
 	        nodes.push_back(new ChannelMergerNode(intArgs[0], intArgs[1]));
 	        
 	    } 
+	    
+    } else if (msg.match("/create-param")
+    	.popInt32(intArgs[0])
+    	.popInt32(intArgs[1])
+    	.popFloat(floatArgs[0])
+    	.isOkNoMoreArgs())
+    {
+    	printf("creating audio param %i of node %i with value %f\n", intArgs[0], intArgs[1], floatArgs[0]);
+        if (intArgs[0] != nodes.size()){
+        	fprintf(stderr, "can't create param, wrong ID\n");
+        	return;
+        }
+        nodes.push_back(new AudioParam(intArgs[0], nodes[intArgs[1]], floatArgs[0]));
+        
+    } else if (msg.match("/set-param")
+    	.popInt32(intArgs[0])
+    	.popFloat(floatArgs[0])
+    	.isOkNoMoreArgs())
+    {
+    	printf("setting param %i to value %f\n", intArgs[0], floatArgs[0]);
+    	nodes[intArgs[0]]->setValue(floatArgs[0]);
     }
-    
+
 }
 
 bool setup(BelaContext *context, void *userData)

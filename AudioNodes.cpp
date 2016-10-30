@@ -82,3 +82,7 @@ float AudioParam::getValueAt(int index){
 void AudioParam::resetInputs(){
 	std::fill(inputBuffer[0][0].begin(), inputBuffer[0][0].end(), value);
 }
+
+void AudioParam::setValue(float val){
+	value = val;
+}

@@ -28,6 +28,7 @@ class AudioNode{
 		int getID();
 		
 		virtual float getValueAt(int index){return 0.0f;};
+		virtual void setValue(float val){};
 		
 	protected:
 		

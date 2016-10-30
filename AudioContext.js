@@ -5,6 +5,7 @@ var osc = require('./AudioContextOSC');
 var present = require('present');
 
 var AudioNode = require('./AudioNode');
+var AudioParam = require('./AudioParam');
 var AudioDestinationNode = require('./AudioDestinationNode');
 var GainNode = require('./GainNode');
 var ChannelSplitterNode = require('./ChannelSplitterNode');
@@ -70,8 +71,9 @@ class AudioContext extends EventEmitter {
 	}
 	
 	createGain(gain){
-		var node = new GainNode(this, IDcount++, gain);
+		var node = new GainNode(this, IDcount++, new AudioParam(this, IDcount++, gain));
 		osc.createNode('GainNode', node);
+		osc.createParam(node, node.gain);
 		return node;
 	}
 	

@@ -13,6 +13,7 @@ class AudioParam : public AudioNode {
 		}
 		void resetInputs();
 		float getValueAt(int index);
+		void setValue(float val);
 	protected:
 		void process();
 	private:
