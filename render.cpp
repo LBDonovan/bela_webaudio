@@ -1,7 +1,6 @@
 #include <Bela.h>
 #include <OSCServer.h>
 #include <OSCClient.h>
-#include <AudioNode.h>
 #include <AudioNodes.h>
 
 #define OSC_RECIEVE 3427
