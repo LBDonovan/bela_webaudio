@@ -38,9 +38,7 @@ class AudioNode extends EventEmitter {
 		output = (output || 0);
 		input = (input || 0);
 		
-		if (destination instanceof AudioNode){
-			osc.connectNodes(this.ID, destination.ID, output, input);
-		}
+		osc.connectNodes(this.ID, destination.ID, output, input);
 		
 	}
 	

@@ -3,12 +3,22 @@ var AudioContext = require('./AudioContext');
 
 var ctx = new AudioContext();
 
-var oscillator = ctx.createOscillator();
+var gain = ctx.createGain(1);
 
+ctx.source.connect(gain);
+gain.connect(ctx.destination);
+
+var oscillator = ctx.createOscillator();
 oscillator.type = 'sine';
-oscillator.frequency.value = 440; // value in hertz
-oscillator.connect(ctx.destination);
+oscillator.frequency.value = 2; // value in hertz
+oscillator.connect(gain.gain);
 oscillator.start();
+
+var oscillator2 = ctx.createOscillator();
+oscillator2.type = 'sine';
+oscillator2.frequency.value = 3; // value in hertz
+oscillator2.connect(gain.gain);
+oscillator2.start();
 
 ctx.onstatechange = function() {
   console.log('STATE', ctx.state);
@@ -24,6 +34,6 @@ ctx.onstatechange = function() {
 	setTimeout( () => {
 		// console.log('setting gain');
 		oscillator.detune.value = 0;
-		oscillator.frequency.value = 220;
+		// oscillator.frequency.value = 220;
 	}, 6000);
 }
