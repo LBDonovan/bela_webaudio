@@ -31,7 +31,7 @@ class AudioParam extends AudioNode {
 	}
 	
 	setValueAtTime(value, time){
-		osc.setParamValueAtTime(this, value, time);
+		osc.paramEvent(this, 0, value, time);
 	}
 	
 }

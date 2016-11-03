@@ -50,7 +50,7 @@ class AudioContextOSC extends EventEmitter{
 	createNode(name, node){
 		console.log('creating node', name, node.ID);
 		sendOSC({
-			address : '/create-node/'+name,
+			address : '/node/create/'+name,
 			args	: [
 				{
 					type	: 'integer',
@@ -67,7 +67,7 @@ class AudioContextOSC extends EventEmitter{
 	createParam(parent, param){
 		console.log('creating param', param.ID, parent.ID);
 		sendOSC({
-			address: '/create-param',
+			address: '/param/create',
 			args: [
 				{
 					type	: 'integer',
@@ -88,7 +88,7 @@ class AudioContextOSC extends EventEmitter{
 	connectNodes(source, destination, output, input){
 		console.log('connect nodes', source, destination, output, input);
 		sendOSC({
-			address	: '/connect-nodes',
+			address	: '/node/connect',
 			args	: [
 				{
 					type	: 'integer',
@@ -113,7 +113,7 @@ class AudioContextOSC extends EventEmitter{
 	setParamValue(param){
 		console.log('setting param', param.ID, 'to value', param.value);
 		sendOSC({
-			address	: '/set-param',
+			address	: '/param/set',
 			args	: [
 				{
 					type	: 'integer',
@@ -130,7 +130,7 @@ class AudioContextOSC extends EventEmitter{
 	setOscillatorType(node, type){
 		console.log('setting oscillator type to', type);
 		sendOSC({
-			address : '/set-osc-type',
+			address : '/node/set-oscillator-type',
 			args	: [
 				{
 					type	: 'integer',
@@ -147,7 +147,7 @@ class AudioContextOSC extends EventEmitter{
 	setOscillatorState(node, state){
 		console.log('setting oscillator state to', state);
 		sendOSC({
-			address : '/set-osc-state',
+			address : '/node/set-oscillator-state',
 			args	: [
 				{
 					type	: 'integer',
@@ -161,14 +161,18 @@ class AudioContextOSC extends EventEmitter{
 		})
 	}
 	
-	setParamValueAtTime(param, value, time){
+	paramEvent(param, event, value, time){
 		console.log('setting param', param.ID, 'to value', value, 'at time', time);
 		sendOSC({
-			address : '/set-param-value-at-time',
+			address : '/param/event',
 			args	: [
 				{
 					type	: 'integer',
 					value	: param.ID
+				},
+				{
+					type	: 'integer',
+					value	: event
 				},
 				{
 					type	: 'float',

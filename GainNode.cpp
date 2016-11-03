@@ -1,5 +1,5 @@
-/***** AudioNodes.cpp *****/
-#include <AudioNodes.h>
+/***** GainNode.cpp *****/
+#include <GainNode.h>
 
 void GainNode::render(){
 	for (int i = 0; i<inputs; i++){

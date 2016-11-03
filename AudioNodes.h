@@ -8,11 +8,6 @@
 #include <ChannelNodes.h>
 #include <AudioParam.h>
 #include <OscillatorNode.h>
-
-class GainNode : public AudioNode {
-	public:
-		GainNode(int id) : AudioNode(id, 1, 1, 1, MAX_CCM){}
-		void render();
-};
+#include <GainNode.h>
 
 #endif
