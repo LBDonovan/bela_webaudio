@@ -2,12 +2,15 @@
 #include <OSCServer.h>
 #include <OSCClient.h>
 #include <AudioNodes.h>
+#include <Scope.h>
 
 #define OSC_RECIEVE 3427
 #define OSC_SEND 3426
 
 OSCServer oscServer;
 OSCClient oscClient;
+
+Scope scope;
 
 AudioSourceNode source(0);
 AudioDestinationNode destination(1);
@@ -149,6 +152,8 @@ bool setup(BelaContext *context, void *userData)
     oscServer.setup(OSC_RECIEVE);
     oscClient.setup(OSC_SEND);
     
+    scope.setup(1, context->audioSampleRate);
+    
     nodes.reserve(4096);
     
     nodes.push_back(&source);
@@ -205,6 +210,10 @@ void render(BelaContext *context, void *userData)
     
     for (auto node : nodes){
     	node->resetInputs();
+    }
+    
+    for (int n=0; n<context->audioFrames; n++){
+    	scope.log(context->audioOut[n * context->audioOutChannels]);
     }
 }
 
