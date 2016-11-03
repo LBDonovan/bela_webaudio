@@ -15,6 +15,8 @@ AudioDestinationNode destination(1);
 std::vector<AudioNode*> nodes;
 std::vector<OscillatorNode*> oscillatorNodes;
 
+unsigned long gAudioFramesElapsed;
+
 // parse messages received by OSC Server
 void parseMessage(oscpkt::Message msg){
     
@@ -129,6 +131,15 @@ void parseMessage(oscpkt::Message msg){
 		printf("setting state of oscillator node %i to %i\n", intArgs[0], intArgs[1]);
     	nodes[intArgs[0]]->setState(intArgs[1]);
         
+    } else if (msg.match("/set-param-value-at-time")
+	    	.popInt32(intArgs[0])
+	    	.popFloat(floatArgs[0])
+	    	.popFloat(floatArgs[1])
+	    	.isOkNoMoreArgs())
+	{
+		unsigned long sample = floatArgs[1] * 44100.0;
+		printf("setting param %i to value %f at time %f, sample %lu\n", intArgs[0], floatArgs[0], floatArgs[1], sample);
+    	nodes[intArgs[0]]->addEvent(SET_VALUE, floatArgs[0], sample);
     }
 
 }
@@ -182,6 +193,8 @@ void render(BelaContext *context, void *userData)
 	    	oscClient.queueMessage(oscClient.newMessage.to("/osc-timestamp").add(count).end());
 	    }
     }
+    
+    gAudioFramesElapsed = context->audioFramesElapsed + context->audioFrames;
     
     for (auto node : oscillatorNodes){
     	node->processParams();

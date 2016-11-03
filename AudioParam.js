@@ -30,6 +30,10 @@ class AudioParam extends AudioNode {
 		console.log('cannot disconnect AudioParam');
 	}
 	
+	setValueAtTime(value, time){
+		osc.setParamValueAtTime(this, value, time);
+	}
+	
 }
 
 module.exports = AudioParam;

@@ -111,7 +111,7 @@ class AudioContextOSC extends EventEmitter{
 	}
 	
 	setParamValue(param){
-		console.log('setting param value');
+		console.log('setting param', param.ID, 'to value', param.value);
 		sendOSC({
 			address	: '/set-param',
 			args	: [
@@ -156,6 +156,27 @@ class AudioContextOSC extends EventEmitter{
 				{
 					type	: 'integer',
 					value	: state
+				}
+			]
+		})
+	}
+	
+	setParamValueAtTime(param, value, time){
+		console.log('setting param', param.ID, 'to value', value, 'at time', time);
+		sendOSC({
+			address : '/set-param-value-at-time',
+			args	: [
+				{
+					type	: 'integer',
+					value	: param.ID
+				},
+				{
+					type	: 'float',
+					value	: value
+				},
+				{
+					type	: 'float',
+					value	: time
 				}
 			]
 		})

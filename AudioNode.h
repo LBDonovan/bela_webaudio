@@ -32,6 +32,7 @@ class AudioNode{
 		virtual void setValue(float val){};
 		virtual void setType(int _type){};
 		virtual void setState(int _type){};
+		virtual void addEvent(int type, float target, unsigned long time){};
 		
 	protected:
 		
